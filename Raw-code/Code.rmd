@@ -25,9 +25,11 @@ In this case im going to solve this problem.
 # loading libraries
 library(tidyverse)
 library(caret)
-
+library(knitr)
+library(kableExtra)
 # loading data
-df<-read.csv('https://s3.amazonaws.com/talent-assets.datacamp.com/fitness_class_2212.csv')
+setwd('/Users/radeksobon/Documents/Attendance-class-problem-git/Attendance-class-problem/Raw-code')
+df<-read.csv('fitness_class_2212.csv')
 df<-as.data.frame(df)
 
 ```
@@ -37,13 +39,19 @@ df<-as.data.frame(df)
 ```{r}
 # first look the 10 rows of data
 df%>%
-head(10)%>%knitr::kable(align = "c")
+head(10)%>%kable(booktabs = TRUE, align = "c")%>%
+  row_spec(row = 0, color = "white", background = "#808080")%>%kable_styling(position = "center")
+
 
 # checking for what data types contains dataframe
 glimpse(df)
 
 # cheking a basic statistics and missing values
-summary(df)%>%knitr::kable(align = "cccc")
+df%>%
+  select(months_as_member, weight, days_before)%>%
+  summary()%>%
+  kable(booktabs = TRUE, align = "c")%>%
+  row_spec(row = 0, color = "white", background = "#808080")%>%kable_styling(position = "center")
 
 ```
 
@@ -63,7 +71,8 @@ df<-df%>%
 mutate(weight = if_else(weight == min(weight), 40.00,weight))
 
 # info
-summary(df)%>%knitr::kable(align = "cccc")
+summary(df)%>%kable(booktabs = TRUE, align = "c")%>%
+row_spec(row = 0, color = "white", background = "#808080")
 glimpse(df)
 
 ```
@@ -93,7 +102,8 @@ df$attended   <- as.factor(df$attended)
 df$time   <- as.factor(df$time)
 
 # info
-summary(df)%>%knitr::kable(align = "cccc")
+summary(df)%>%kable(booktabs = TRUE, align = "c")%>%
+  row_spec(row = 0, color = "white", background = "#808080")%>%kable_styling(position = "center")
 glimpse(df)
 
 ```
@@ -105,7 +115,8 @@ glimpse(df)
 df<-df%>%
 mutate(days_before = if_else(is.na(days_before), 0, days_before))
 # info
-summary(df)%>%knitr::kable(align = "cccc")
+summary(df)%>%kable(booktabs = TRUE, align = "c")%>%
+  row_spec(row = 0, color = "white", background = "#808080")%>%kable_styling(position = "center")
 glimpse(df)
 ```
 
@@ -128,8 +139,7 @@ list(
 'levels day_of_week' = levels(df$day_of_week),
 'levels time' = levels(df$time),
 'levels category' = levels(df$category),
-'levels attended' = levels(df$attended))%>%
-knitr::kable(align = "cccc")
+'levels attended' = levels(df$attended))
 ```
 
 # Visualization
@@ -143,7 +153,8 @@ geom_bar(position = 'dodge')+
 labs(title = 'Amount of booking attended to class',
 	 x = 'Class name',
 	 y = 'Number of attended')+
-coord_flip()
+coord_flip()+
+theme_dark()
 
 #top 3 attended categories of classes
 
@@ -182,10 +193,11 @@ head(1)
 
 df%>%
 ggplot(aes(months_as_member)) + 
-geom_histogram(binwidth = 0.098, color = 'black')+
+geom_histogram(binwidth = 0.098, color = 'grey')+
 labs(title = 'Distribution of the number of months as a number',
 	 x = 'Number of months as a member',
-	 y = 'Counts')
+	 y = 'Counts')+
+theme_dark()
 
 
 ```
@@ -198,7 +210,8 @@ ggplot(aes(months_as_member, fill = attended_lab)) +
 geom_boxplot()+
 facet_wrap(~attended_lab)+
 labs(title = 'Distribution months_as_member', x = 'Counts', y = 'Number of monts as a member')+
-coord_flip()
+coord_flip()+
+theme_dark()
 ```
 
 ```{r}
@@ -206,7 +219,8 @@ coord_flip()
 df%>%
 filter(attended==1)%>%
 select(months_as_member)%>%
-summary()%>%knitr::kable(align = 'cccc')
+summary()%>%kable(booktabs = TRUE, align = "c")%>%
+  row_spec(row = 0, color = "white", background = "#808080")%>%kable_styling(position = "center")
 ```
 
 ```{r}
@@ -214,7 +228,8 @@ summary()%>%knitr::kable(align = 'cccc')
 df%>%
 filter(attended==0)%>%
 select(months_as_member)%>%
-summary()%>%knitr::kable(align = "cccc")
+summary()%>%kable(booktabs = TRUE, align = "c")%>%
+  row_spec(row = 0, color = "white", background = "#808080")%>%kable_styling(position = "center")
 ```
 
 > For both attendent and non-attendent groups, the median (or 50th percentile) number of months as a member is relatively low, with values of 10 and 20, respectively. This suggests that a significant proportion of members have joined relatively recently.
@@ -234,7 +249,8 @@ df%>%
 ggplot(aes(months_as_member,fill = attended))+
 geom_bar() +
 labs(title = 'Relationship beetween attendance and number of months as a member', x = "Number the month of member", y = 'Counts') +
-facet_wrap(~attended_lab, nrow = 1)
+facet_wrap(~attended_lab, nrow = 1)+
+theme_dark()
 ```
 
 > Bar chart below displays the relationship beetween attendance and number of months as a member
@@ -267,7 +283,6 @@ pred <- predict(model_glm, newdata=test_data, type="response")
 pred_class <- ifelse(pred >= 0.5, 1, 0)
 accuracy <- mean(pred_class == test_data$attended)
 summary(model_glm)
-
 accuracy
 ```
 
